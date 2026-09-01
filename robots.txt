@@ -1,1 +1,4 @@
-h
+User-agent: *
+Allow: /
+
+Sitemap: https://golobbygamerz-pixel.github.io/velora.studio/sitemap.xml
