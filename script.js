@@ -1,5 +1,26 @@
 document.addEventListener("DOMContentLoaded", () => {
 
+    "use strict";
+
+
+    /* ==========================================
+       BASIC HELPERS
+    ========================================== */
+
+    const $ = (selector, parent = document) =>
+        parent.querySelector(selector);
+
+    const $$ = (selector, parent = document) =>
+        [...parent.querySelectorAll(selector)];
+
+    const reducedMotion = window.matchMedia(
+        "(prefers-reduced-motion: reduce)"
+    ).matches;
+
+    const finePointer = window.matchMedia(
+        "(pointer: fine)"
+    ).matches;
+
 
     /* ==========================================
        PAGE LOADER
@@ -7,59 +28,56 @@ document.addEventListener("DOMContentLoaded", () => {
 
     document.body.classList.add("loading");
 
-    const loader =
-        document.querySelector(".page-loader");
+    const hideLoader = () => {
 
+        const loader = $(".page-loader");
 
-    window.addEventListener("load", () => {
+        if (loader) {
+            loader.classList.add("hidden");
+        }
 
-        setTimeout(() => {
+        document.body.classList.remove("loading");
 
-            if (loader) {
-                loader.classList.add("hidden");
-            }
+    };
 
-            document.body.classList.remove("loading");
+    if (document.readyState === "complete") {
 
-        }, 700);
+        setTimeout(hideLoader, 350);
 
-    });
+    } else {
+
+        window.addEventListener(
+            "load",
+            () => setTimeout(hideLoader, 350),
+            { once: true }
+        );
+
+    }
 
 
     /* ==========================================
        SCROLL PROGRESS + HEADER
     ========================================== */
 
-    const progress =
-        document.querySelector(".scroll-progress");
+    const progress = $(".scroll-progress");
+    const header = $(".site-header");
 
-    const header =
-        document.querySelector(".site-header");
+    const updateScrollUI = () => {
 
-
-    function updateScroll() {
-
-        const scrollTop =
-            window.scrollY;
+        const scrollTop = window.scrollY;
 
         const pageHeight =
             document.documentElement.scrollHeight -
             window.innerHeight;
-
 
         const percentage =
             pageHeight > 0
                 ? (scrollTop / pageHeight) * 100
                 : 0;
 
-
         if (progress) {
-
-            progress.style.width =
-                `${percentage}%`;
-
+            progress.style.width = `${percentage}%`;
         }
-
 
         if (header) {
 
@@ -70,70 +88,68 @@ document.addEventListener("DOMContentLoaded", () => {
 
         }
 
-    }
-
+    };
 
     window.addEventListener(
         "scroll",
-        updateScroll,
+        updateScrollUI,
         { passive: true }
     );
 
-
-    updateScroll();
+    updateScrollUI();
 
 
     /* ==========================================
        MOBILE MENU
     ========================================== */
 
-    const menuToggle =
-        document.querySelector(".menu-toggle");
+    const menuToggle = $(".menu-toggle");
+    const mobileMenu = $(".mobile-menu");
 
-    const mobileMenu =
-        document.querySelector(".mobile-menu");
+    const closeMobileMenu = () => {
 
+        if (!menuToggle || !mobileMenu) {
+            return;
+        }
 
-    if (
-        menuToggle &&
-        mobileMenu
-    ) {
+        mobileMenu.classList.remove("open");
+        menuToggle.classList.remove("active");
+
+        menuToggle.setAttribute(
+            "aria-expanded",
+            "false"
+        );
+
+    };
+
+    if (menuToggle && mobileMenu) {
 
         menuToggle.addEventListener(
             "click",
             () => {
 
-                const isOpen =
+                const open =
                     mobileMenu.classList.toggle("open");
 
+                menuToggle.classList.toggle(
+                    "active",
+                    open
+                );
 
                 menuToggle.setAttribute(
                     "aria-expanded",
-                    String(isOpen)
+                    String(open)
                 );
 
             }
         );
 
-
-        mobileMenu
-            .querySelectorAll("a")
+        $$(".mobile-menu a", mobileMenu)
             .forEach(link => {
 
                 link.addEventListener(
                     "click",
-                    () => {
-
-                        mobileMenu.classList.remove(
-                            "open"
-                        );
-
-                        menuToggle.setAttribute(
-                            "aria-expanded",
-                            "false"
-                        );
-
-                    }
+                    closeMobileMenu
                 );
 
             });
@@ -145,11 +161,12 @@ document.addEventListener("DOMContentLoaded", () => {
        SCROLL REVEAL
     ========================================== */
 
-    const revealElements =
-        document.querySelectorAll(".reveal");
+    const revealElements = $$(".reveal");
 
-
-    if ("IntersectionObserver" in window) {
+    if (
+        !reducedMotion &&
+        "IntersectionObserver" in window
+    ) {
 
         const revealObserver =
             new IntersectionObserver(
@@ -157,9 +174,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
                     entries.forEach(entry => {
 
-                        if (
-                            entry.isIntersecting
-                        ) {
+                        if (entry.isIntersecting) {
 
                             entry.target.classList.add(
                                 "visible"
@@ -175,24 +190,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 },
                 {
-                    threshold: 0.12
+                    threshold: 0.08,
+                    rootMargin: "0px 0px -40px 0px"
                 }
             );
 
-
-        revealElements.forEach(
-            element => {
-                revealObserver.observe(element);
-            }
-        );
+        revealElements.forEach(element => {
+            revealObserver.observe(element);
+        });
 
     } else {
 
-        revealElements.forEach(
-            element => {
-                element.classList.add("visible");
-            }
-        );
+        revealElements.forEach(element => {
+            element.classList.add("visible");
+        });
 
     }
 
@@ -201,99 +212,217 @@ document.addEventListener("DOMContentLoaded", () => {
        FAQ
     ========================================== */
 
-    const faqItems =
-        document.querySelectorAll(".faq-item");
+    const faqItems = $$(".faq-item");
 
+    const closeFaq = item => {
+
+        item.classList.remove("active");
+
+        const question =
+            $(".faq-question", item);
+
+        const answer =
+            $(".faq-answer", item);
+
+        if (question) {
+            question.setAttribute(
+                "aria-expanded",
+                "false"
+            );
+        }
+
+        if (answer) {
+            answer.style.maxHeight = null;
+        }
+
+    };
+
+    const openFaq = item => {
+
+        item.classList.add("active");
+
+        const question =
+            $(".faq-question", item);
+
+        const answer =
+            $(".faq-answer", item);
+
+        if (question) {
+            question.setAttribute(
+                "aria-expanded",
+                "true"
+            );
+        }
+
+        if (answer) {
+            answer.style.maxHeight =
+                `${answer.scrollHeight}px`;
+        }
+
+    };
 
     faqItems.forEach(item => {
 
         const question =
-            item.querySelector(
-                ".faq-question"
-            );
+            $(".faq-question", item);
 
-        const answer =
-            item.querySelector(
-                ".faq-answer"
-            );
-
-
-        if (
-            !question ||
-            !answer
-        ) {
+        if (!question) {
             return;
         }
-
 
         question.addEventListener(
             "click",
             () => {
 
-                const wasActive =
-                    item.classList.contains(
-                        "active"
-                    );
+                const active =
+                    item.classList.contains("active");
 
+                faqItems.forEach(other => {
 
-                faqItems.forEach(
-                    other => {
-
-                        other.classList.remove(
-                            "active"
-                        );
-
-
-                        const otherQuestion =
-                            other.querySelector(
-                                ".faq-question"
-                            );
-
-
-                        const otherAnswer =
-                            other.querySelector(
-                                ".faq-answer"
-                            );
-
-
-                        if (otherAnswer) {
-
-                            otherAnswer.style.maxHeight =
-                                null;
-
-                        }
-
-
-                        if (otherQuestion) {
-
-                            otherQuestion.setAttribute(
-                                "aria-expanded",
-                                "false"
-                            );
-
-                        }
-
+                    if (other !== item) {
+                        closeFaq(other);
                     }
-                );
 
+                });
 
-                if (!wasActive) {
-
-                    item.classList.add(
-                        "active"
-                    );
-
-
-                    question.setAttribute(
-                        "aria-expanded",
-                        "true"
-                    );
-
-
-                    answer.style.maxHeight =
-                        `${answer.scrollHeight}px`;
-
+                if (active) {
+                    closeFaq(item);
+                } else {
+                    openFaq(item);
                 }
+
+            }
+        );
+
+    });
+
+    window.addEventListener(
+        "resize",
+        () => {
+
+            const activeItem =
+                $(".faq-item.active");
+
+            if (!activeItem) {
+                return;
+            }
+
+            const answer =
+                $(".faq-answer", activeItem);
+
+            if (answer) {
+                answer.style.maxHeight =
+                    `${answer.scrollHeight}px`;
+            }
+
+        },
+        { passive: true }
+    );
+
+
+    /* ==========================================
+       WHATSAPP
+    ========================================== */
+
+    const whatsappNumber =
+        "919310151087";
+
+    const whatsappMessages = {
+
+        "New Website":
+            "Hi VELORA.STUDIO, I'd like to book a website project.",
+
+        "Website Design":
+            "Hi VELORA.STUDIO, I'd like to discuss website design.",
+
+        "Website Development":
+            "Hi VELORA.STUDIO, I'd like to discuss website development.",
+
+        "Website Redesign":
+            "Hi VELORA.STUDIO, I'd like to discuss redesigning my website.",
+
+        "Landing Page":
+            "Hi VELORA.STUDIO, I'm interested in a landing page.",
+
+        "E-commerce":
+            "Hi VELORA.STUDIO, I'd like to discuss an e-commerce website.",
+
+        "UI/UX Design":
+            "Hi VELORA.STUDIO, I'd like to discuss UI/UX design.",
+
+        "Animations & Interactions":
+            "Hi VELORA.STUDIO, I'd like to discuss animations and interactions.",
+
+        "Website Optimization":
+            "Hi VELORA.STUDIO, I'd like to discuss website optimization.",
+
+        "Website Maintenance":
+            "Hi VELORA.STUDIO, I'd like to discuss website maintenance."
+
+    };
+
+
+    const createWhatsAppURL = (
+        service = "New Website",
+        extraMessage = ""
+    ) => {
+
+        const baseMessage =
+            whatsappMessages[service] ||
+            whatsappMessages["New Website"];
+
+        const finalMessage =
+            extraMessage
+                ? `${baseMessage}\n\n${extraMessage}`
+                : baseMessage;
+
+        return `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(finalMessage)}`;
+
+    };
+
+
+    const openWhatsApp = (
+        service = "New Website",
+        extraMessage = ""
+    ) => {
+
+        const url =
+            createWhatsAppURL(
+                service,
+                extraMessage
+            );
+
+        window.open(
+            url,
+            "_blank",
+            "noopener,noreferrer"
+        );
+
+    };
+
+
+    /* ==========================================
+       SERVICE BUTTONS
+    ========================================== */
+
+    $$("[data-service]").forEach(button => {
+
+        button.addEventListener(
+            "click",
+            event => {
+
+                const service =
+                    button.getAttribute(
+                        "data-service"
+                    );
+
+                if (!service) {
+                    return;
+                }
+
+                event.preventDefault();
+
+                openWhatsApp(service);
 
             }
         );
@@ -302,290 +431,59 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* ==========================================
-       SMOOTH ANCHOR SCROLL
+       CONTACT FORM
     ========================================== */
 
-    document
-        .querySelectorAll(
-            'a[href^="#"]'
-        )
-        .forEach(link => {
+    const form = $("#project-form");
 
-            link.addEventListener(
-                "click",
-                event => {
+    const formSuccess = $("#form-success");
 
-                    const targetId =
-                        link.getAttribute(
-                            "href"
-                        );
+    const emailProject = $("#email-project");
 
+    const nameInput = $("#name");
+    const emailInput = $("#email");
+    const serviceSelect = $("#service");
+    const budgetSelect = $("#budget");
+    const messageInput = $("#message");
 
-                    if (
-                        !targetId ||
-                        targetId === "#"
-                    ) {
-                        return;
-                    }
 
+    const getFormData = () => {
 
-                    const target =
-                        document.querySelector(
-                            targetId
-                        );
+        return {
 
+            name:
+                nameInput?.value.trim() || "",
 
-                    if (!target) {
-                        return;
-                    }
+            email:
+                emailInput?.value.trim() || "",
 
+            service:
+                serviceSelect?.value || "",
 
-                    event.preventDefault();
+            budget:
+                budgetSelect?.value || "",
 
+            message:
+                messageInput?.value.trim() || ""
 
-                    const headerOffset =
-                        window.innerWidth <= 760
-                            ? 65
-                            : 80;
+        };
 
+    };
 
-                    const targetPosition =
-                        target.getBoundingClientRect()
-                            .top +
-                        window.scrollY -
-                        headerOffset;
 
+    const buildProjectMessage = data => {
 
-                    window.scrollTo({
-                        top: targetPosition,
-                        behavior: "smooth"
-                    });
+        return [
+            `Name: ${data.name}`,
+            `Email: ${data.email}`,
+            `Service: ${data.service}`,
+            `Approximate Budget: ${data.budget || "Not specified"}`,
+            "",
+            "Project Details:",
+            data.message
+        ].join("\n");
 
-                }
-            );
-
-        });
-
-
-    /* ==========================================
-       BEFORE / AFTER SLIDER
-    ========================================== */
-
-    const comparisonFrame =
-        document.querySelector(
-            ".comparison-frame"
-        );
-
-    const comparisonAfter =
-        document.querySelector(
-            "#comparisonAfter"
-        );
-
-    const comparisonHandle =
-        document.querySelector(
-            "#comparisonHandle"
-        );
-
-
-    if (
-        comparisonFrame &&
-        comparisonAfter &&
-        comparisonHandle
-    ) {
-
-        let dragging = false;
-
-
-        function setSlider(percentage) {
-
-            percentage =
-                Math.max(
-                    5,
-                    Math.min(
-                        95,
-                        percentage
-                    )
-                );
-
-
-            comparisonAfter.style.width =
-                `${percentage}%`;
-
-
-            comparisonHandle.style.left =
-                `${percentage}%`;
-
-
-            comparisonHandle.setAttribute(
-                "aria-valuenow",
-                Math.round(percentage)
-            );
-
-
-            /*
-            Keep the AFTER website at the
-            full comparison width instead
-            of shrinking the iframe.
-            */
-
-            comparisonFrame.style
-                .setProperty(
-                    "--comparison-width",
-                    `${comparisonFrame.clientWidth}px`
-                );
-
-        }
-
-
-        function setSliderFromPointer(
-            clientX
-        ) {
-
-            const rect =
-                comparisonFrame
-                    .getBoundingClientRect();
-
-
-            const percentage =
-                (
-                    (clientX - rect.left) /
-                    rect.width
-                ) * 100;
-
-
-            setSlider(percentage);
-
-        }
-
-
-        comparisonHandle.addEventListener(
-            "pointerdown",
-            event => {
-
-                dragging = true;
-
-
-                comparisonHandle.setPointerCapture(
-                    event.pointerId
-                );
-
-
-                setSliderFromPointer(
-                    event.clientX
-                );
-
-            }
-        );
-
-
-        comparisonFrame.addEventListener(
-            "pointermove",
-            event => {
-
-                if (!dragging) {
-                    return;
-                }
-
-
-                setSliderFromPointer(
-                    event.clientX
-                );
-
-            }
-        );
-
-
-        comparisonHandle.addEventListener(
-            "pointerup",
-            () => {
-
-                dragging = false;
-
-            }
-        );
-
-
-        comparisonHandle.addEventListener(
-            "pointercancel",
-            () => {
-
-                dragging = false;
-
-            }
-        );
-
-
-        comparisonHandle.addEventListener(
-            "keydown",
-            event => {
-
-                const current =
-                    Number(
-                        comparisonHandle
-                            .getAttribute(
-                                "aria-valuenow"
-                            )
-                    ) || 50;
-
-
-                if (
-                    event.key ===
-                    "ArrowLeft"
-                ) {
-
-                    event.preventDefault();
-
-                    setSlider(
-                        current - 5
-                    );
-
-                }
-
-
-                if (
-                    event.key ===
-                    "ArrowRight"
-                ) {
-
-                    event.preventDefault();
-
-                    setSlider(
-                        current + 5
-                    );
-
-                }
-
-            }
-        );
-
-
-        window.addEventListener(
-            "resize",
-            () => {
-
-                comparisonFrame.style
-                    .setProperty(
-                        "--comparison-width",
-                        `${comparisonFrame.clientWidth}px`
-                    );
-
-            }
-        );
-
-
-        setSlider(50);
-
-    }
-
-
-    /* ==========================================
-       CONTACT FORM → WHATSAPP
-    ========================================== */
-
-    const form =
-        document.querySelector(
-            "#project-form"
-        );
+    };
 
 
     if (form) {
@@ -596,43 +494,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 event.preventDefault();
 
-
-                const name =
-                    document.querySelector(
-                        "#name"
-                    )?.value.trim();
-
-
-                const email =
-                    document.querySelector(
-                        "#email"
-                    )?.value.trim();
-
-
-                const service =
-                    document.querySelector(
-                        "#service"
-                    )?.value;
-
-
-                const budget =
-                    document.querySelector(
-                        "#budget"
-                    )?.value;
-
-
-                const message =
-                    document.querySelector(
-                        "#message"
-                    )?.value.trim();
-
-
-                if (
-                    !name ||
-                    !email ||
-                    !service ||
-                    !message
-                ) {
+                if (!form.checkValidity()) {
 
                     form.reportValidity();
 
@@ -640,53 +502,24 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 }
 
+                const data =
+                    getFormData();
 
-                const whatsappMessage =
-`Hi VELORA.STUDIO 👋
+                const details =
+                    buildProjectMessage(data);
 
-I'd like to discuss a website project.
+                if (formSuccess) {
 
-Name:
-${name}
+                    formSuccess.textContent =
+                        "WhatsApp is opening with your project enquiry.";
 
-Email:
-${email}
-
-Service:
-${service}
-
-Approximate Budget:
-${budget || "Not specified"}
-
-Project Details:
-${message}`;
-
-
-                const whatsappURL =
-                    `https://wa.me/919310151087?text=${encodeURIComponent(
-                        whatsappMessage
-                    )}`;
-
-
-                const success =
-                    document.querySelector(
-                        "#form-success"
-                    );
-
-
-                if (success) {
-
-                    success.classList.add(
-                        "show"
-                    );
+                    formSuccess.classList.add("show");
 
                 }
 
-
-                window.open(
-                    whatsappURL,
-                    "_blank",
-                    "noopener,noreferrer"
+                openWhatsApp(
+                    data.service || "New Website",
+                    details
                 );
 
             }
@@ -696,19 +529,308 @@ ${message}`;
 
 
     /* ==========================================
+       EMAIL ENQUIRY
+    ========================================== */
+
+    if (emailProject) {
+
+        emailProject.addEventListener(
+            "click",
+            event => {
+
+                event.preventDefault();
+
+                const data =
+                    getFormData();
+
+                const service =
+                    data.service || "Website Project";
+
+                const subject =
+                    `VELORA.STUDIO Project Enquiry — ${service}`;
+
+                const body = [
+                    "Hello VELORA.STUDIO,",
+                    "",
+                    "I'd like to discuss a website project.",
+                    "",
+                    `Name: ${data.name || "Not provided"}`,
+                    `Email: ${data.email || "Not provided"}`,
+                    `Service: ${data.service || "Not specified"}`,
+                    `Approximate Budget: ${data.budget || "Not specified"}`,
+                    "",
+                    "Project Details:",
+                    data.message || "I'd like to discuss my website project."
+                ].join("\n");
+
+                window.location.href =
+                    `mailto:golobbygamerz@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+
+            }
+        );
+
+    }
+
+
+    /* ==========================================
+       BEFORE / AFTER SLIDER
+    ========================================== */
+
+    const comparison =
+        $("[data-before-after]");
+
+    if (comparison) {
+
+        const stage =
+            $(".before-after-stage", comparison);
+
+        const handle =
+            $(".comparison-handle", stage);
+
+        const afterPane =
+            $(".comparison-after", stage);
+
+        if (stage && handle && afterPane) {
+
+            let dragging = false;
+
+            const clamp = (
+                value,
+                min,
+                max
+            ) => Math.min(
+                Math.max(value, min),
+                max
+            );
+
+
+            const setPosition = percentage => {
+
+                const value =
+                    clamp(
+                        Number(percentage),
+                        0,
+                        100
+                    );
+
+                stage.style.setProperty(
+                    "--split",
+                    `${value}%`
+                );
+
+                afterPane.style.clipPath =
+                    `inset(0 0 0 ${value}%)`;
+
+                handle.style.left =
+                    `${value}%`;
+
+                stage.setAttribute(
+                    "aria-valuenow",
+                    String(Math.round(value))
+                );
+
+            };
+
+
+            const updateFromPointer =
+                clientX => {
+
+                    const rect =
+                        stage.getBoundingClientRect();
+
+                    if (!rect.width) {
+                        return;
+                    }
+
+                    const percentage =
+                        ((clientX - rect.left) /
+                            rect.width) *
+                        100;
+
+                    setPosition(percentage);
+
+                };
+
+
+            const resizePreview = () => {
+
+                const width =
+                    stage.clientWidth;
+
+                const scale =
+                    Math.min(
+                        width / 1440,
+                        1
+                    );
+
+                stage.style.setProperty(
+                    "--preview-scale",
+                    String(scale)
+                );
+
+            };
+
+
+            const startDrag = event => {
+
+                dragging = true;
+
+                stage.setPointerCapture?.(
+                    event.pointerId
+                );
+
+                updateFromPointer(
+                    event.clientX
+                );
+
+            };
+
+
+            const drag = event => {
+
+                if (!dragging) {
+                    return;
+                }
+
+                updateFromPointer(
+                    event.clientX
+                );
+
+            };
+
+
+            const stopDrag = event => {
+
+                dragging = false;
+
+                try {
+
+                    stage.releasePointerCapture?.(
+                        event.pointerId
+                    );
+
+                } catch (error) {
+                    // Pointer may already have been released.
+                }
+
+            };
+
+
+            stage.addEventListener(
+                "pointerdown",
+                startDrag
+            );
+
+            stage.addEventListener(
+                "pointermove",
+                drag
+            );
+
+            stage.addEventListener(
+                "pointerup",
+                stopDrag
+            );
+
+            stage.addEventListener(
+                "pointercancel",
+                stopDrag
+            );
+
+            stage.addEventListener(
+                "lostpointercapture",
+                () => {
+                    dragging = false;
+                }
+            );
+
+
+            stage.addEventListener(
+                "keydown",
+                event => {
+
+                    const current =
+                        Number(
+                            stage.getAttribute(
+                                "aria-valuenow"
+                            )
+                        ) || 50;
+
+                    if (
+                        event.key === "ArrowLeft" ||
+                        event.key === "ArrowRight"
+                    ) {
+
+                        event.preventDefault();
+
+                        const direction =
+                            event.key === "ArrowLeft"
+                                ? -5
+                                : 5;
+
+                        setPosition(
+                            current + direction
+                        );
+
+                    }
+
+                    if (event.key === "Home") {
+
+                        event.preventDefault();
+
+                        setPosition(0);
+
+                    }
+
+                    if (event.key === "End") {
+
+                        event.preventDefault();
+
+                        setPosition(100);
+
+                    }
+
+                }
+            );
+
+
+            if ("ResizeObserver" in window) {
+
+                const resizeObserver =
+                    new ResizeObserver(
+                        resizePreview
+                    );
+
+                resizeObserver.observe(stage);
+
+            } else {
+
+                window.addEventListener(
+                    "resize",
+                    resizePreview,
+                    { passive: true }
+                );
+
+            }
+
+
+            setPosition(50);
+
+            resizePreview();
+
+        }
+
+    }
+
+
+    /* ==========================================
        FLOATING CONTACT
     ========================================== */
 
     const floatingContact =
-        document.querySelector(
-            ".floating-contact"
-        );
+        $(".floating-contact");
 
     const floatingButton =
-        document.querySelector(
-            ".floating-contact-button"
-        );
-
+        $(".floating-contact-button");
 
     if (
         floatingContact &&
@@ -721,16 +843,14 @@ ${message}`;
 
                 event.stopPropagation();
 
-
-                const isOpen =
+                const open =
                     floatingContact.classList.toggle(
                         "open"
                     );
 
-
                 floatingButton.setAttribute(
                     "aria-expanded",
-                    String(isOpen)
+                    String(open)
                 );
 
             }
@@ -751,7 +871,6 @@ ${message}`;
                         "open"
                     );
 
-
                     floatingButton.setAttribute(
                         "aria-expanded",
                         "false"
@@ -766,66 +885,111 @@ ${message}`;
 
 
     /* ==========================================
-       MAGNETIC BUTTONS
+       SMOOTH ANCHOR SCROLL
     ========================================== */
 
-    const magneticButtons =
-        document.querySelectorAll(
-            ".magnetic"
-        );
+    $$('a[href^="#"]').forEach(link => {
 
+        link.addEventListener(
+            "click",
+            event => {
 
-    if (
-        window.matchMedia(
-            "(pointer: fine)"
-        ).matches
-    ) {
+                const targetId =
+                    link.getAttribute("href");
 
-        magneticButtons.forEach(
-            button => {
+                if (
+                    !targetId ||
+                    targetId === "#"
+                ) {
+                    return;
+                }
 
-                button.addEventListener(
-                    "mousemove",
-                    event => {
+                const target =
+                    document.querySelector(
+                        targetId
+                    );
 
-                        const rect =
-                            button.getBoundingClientRect();
+                if (!target) {
+                    return;
+                }
 
+                event.preventDefault();
 
-                        const x =
-                            event.clientX -
-                            rect.left -
-                            rect.width / 2;
+                const headerOffset =
+                    window.innerWidth <= 900
+                        ? 70
+                        : 85;
 
+                const targetPosition =
+                    target.getBoundingClientRect().top +
+                    window.scrollY -
+                    headerOffset;
 
-                        const y =
-                            event.clientY -
-                            rect.top -
-                            rect.height / 2;
+                window.scrollTo({
 
+                    top: Math.max(
+                        targetPosition,
+                        0
+                    ),
 
-                        button.style.transform =
-                            `translate(
-                                ${x * 0.10}px,
-                                ${y * 0.10}px
-                            )`;
+                    behavior:
+                        reducedMotion
+                            ? "auto"
+                            : "smooth"
 
-                    }
-                );
-
-
-                button.addEventListener(
-                    "mouseleave",
-                    () => {
-
-                        button.style.transform =
-                            "";
-
-                    }
-                );
+                });
 
             }
         );
+
+    });
+
+
+    /* ==========================================
+       MAGNETIC BUTTONS
+    ========================================== */
+
+    if (
+        finePointer &&
+        !reducedMotion
+    ) {
+
+        $$(".magnetic").forEach(button => {
+
+            button.addEventListener(
+                "pointermove",
+                event => {
+
+                    const rect =
+                        button.getBoundingClientRect();
+
+                    const x =
+                        event.clientX -
+                        rect.left -
+                        rect.width / 2;
+
+                    const y =
+                        event.clientY -
+                        rect.top -
+                        rect.height / 2;
+
+                    button.style.transform =
+                        `translate(${x * 0.08}px, ${y * 0.08}px)`;
+
+                }
+            );
+
+
+            button.addEventListener(
+                "pointerleave",
+                () => {
+
+                    button.style.transform = "";
+
+                }
+            );
+
+        });
 
     }
 
@@ -835,22 +999,16 @@ ${message}`;
     ========================================== */
 
     const cursorDot =
-        document.querySelector(
-            ".cursor-dot"
-        );
+        $(".cursor-dot");
 
     const cursorRing =
-        document.querySelector(
-            ".cursor-ring"
-        );
-
+        $(".cursor-ring");
 
     if (
+        finePointer &&
+        !reducedMotion &&
         cursorDot &&
-        cursorRing &&
-        window.matchMedia(
-            "(pointer: fine)"
-        ).matches
+        cursorRing
     ) {
 
         let mouseX = 0;
@@ -859,17 +1017,12 @@ ${message}`;
         let ringX = 0;
         let ringY = 0;
 
-
         document.addEventListener(
-            "mousemove",
+            "pointermove",
             event => {
 
-                mouseX =
-                    event.clientX;
-
-                mouseY =
-                    event.clientY;
-
+                mouseX = event.clientX;
+                mouseY = event.clientY;
 
                 cursorDot.style.left =
                     `${mouseX}px`;
@@ -877,25 +1030,18 @@ ${message}`;
                 cursorDot.style.top =
                     `${mouseY}px`;
 
-            }
+            },
+            { passive: true }
         );
 
 
-        function animateCursor() {
+        const animateCursor = () => {
 
             ringX +=
-                (
-                    mouseX -
-                    ringX
-                ) * 0.12;
-
+                (mouseX - ringX) * 0.14;
 
             ringY +=
-                (
-                    mouseY -
-                    ringY
-                ) * 0.12;
-
+                (mouseY - ringY) * 0.14;
 
             cursorRing.style.left =
                 `${ringX}px`;
@@ -903,47 +1049,43 @@ ${message}`;
             cursorRing.style.top =
                 `${ringY}px`;
 
-
             requestAnimationFrame(
                 animateCursor
             );
 
-        }
-
+        };
 
         animateCursor();
 
 
-        document
-            .querySelectorAll(
-                "a, button, .service-card, .project-preview"
-            )
-            .forEach(element => {
+        $$(
+            "a, button, .service-card, .project-preview, .before-after-stage"
+        ).forEach(element => {
 
-                element.addEventListener(
-                    "mouseenter",
-                    () => {
+            element.addEventListener(
+                "pointerenter",
+                () => {
 
-                        document.body.classList.add(
-                            "cursor-hover"
-                        );
+                    document.body.classList.add(
+                        "cursor-hover"
+                    );
 
-                    }
-                );
+                }
+            );
 
 
-                element.addEventListener(
-                    "mouseleave",
-                    () => {
+            element.addEventListener(
+                "pointerleave",
+                () => {
 
-                        document.body.classList.remove(
-                            "cursor-hover"
-                        );
+                    document.body.classList.remove(
+                        "cursor-hover"
+                    );
 
-                    }
-                );
+                }
+            );
 
-            });
+        });
 
     }
 
@@ -953,41 +1095,49 @@ ${message}`;
     ========================================== */
 
     const heroVisual =
-        document.querySelector(
-            ".hero-visual"
-        );
-
+        $(".hero-visual");
 
     if (
-        heroVisual &&
-        window.matchMedia(
-            "(pointer: fine)"
-        ).matches
+        finePointer &&
+        !reducedMotion &&
+        heroVisual
     ) {
 
+        let frameRequested = false;
+
         document.addEventListener(
-            "mousemove",
+            "pointermove",
             event => {
 
-                const x =
-                    event.clientX /
-                    window.innerWidth -
-                    0.5;
+                if (frameRequested) {
+                    return;
+                }
 
+                frameRequested = true;
 
-                const y =
-                    event.clientY /
-                    window.innerHeight -
-                    0.5;
+                requestAnimationFrame(
+                    () => {
 
+                        const x =
+                            event.clientX /
+                                window.innerWidth -
+                            0.5;
 
-                heroVisual.style.transform =
-                    `translate(
-                        ${x * 8}px,
-                        ${y * 8}px
-                    )`;
+                        const y =
+                            event.clientY /
+                                window.innerHeight -
+                            0.5;
 
-            }
+                        heroVisual.style.transform =
+                            `translate3d(${x * 7}px, ${y * 7}px, 0)`;
+
+                        frameRequested = false;
+
+                    }
+                );
+
+            },
+            { passive: true }
         );
 
     }
@@ -1001,31 +1151,11 @@ ${message}`;
         "keydown",
         event => {
 
-            if (
-                event.key !== "Escape"
-            ) {
+            if (event.key !== "Escape") {
                 return;
             }
 
-
-            if (mobileMenu) {
-
-                mobileMenu.classList.remove(
-                    "open"
-                );
-
-            }
-
-
-            if (menuToggle) {
-
-                menuToggle.setAttribute(
-                    "aria-expanded",
-                    "false"
-                );
-
-            }
-
+            closeMobileMenu();
 
             if (floatingContact) {
 
@@ -1033,12 +1163,7 @@ ${message}`;
                     "open"
                 );
 
-            }
-
-
-            if (floatingButton) {
-
-                floatingButton.setAttribute(
+                floatingButton?.setAttribute(
                     "aria-expanded",
                     "false"
                 );
