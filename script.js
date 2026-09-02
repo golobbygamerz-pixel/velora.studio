@@ -1,18 +1,19 @@
 document.addEventListener("DOMContentLoaded", () => {
 
-    /*
-    ==========================================
-    PAGE LOADER
-    ==========================================
-    */
+
+    /* ==========================================
+       PAGE LOADER
+    ========================================== */
 
     document.body.classList.add("loading");
+
+    const loader =
+        document.querySelector(".page-loader");
+
 
     window.addEventListener("load", () => {
 
         setTimeout(() => {
-
-            const loader = document.querySelector(".page-loader");
 
             if (loader) {
                 loader.classList.add("hidden");
@@ -20,63 +21,71 @@ document.addEventListener("DOMContentLoaded", () => {
 
             document.body.classList.remove("loading");
 
-        }, 500);
+        }, 700);
 
     });
 
 
+    /* ==========================================
+       SCROLL PROGRESS + HEADER
+    ========================================== */
 
-    /*
-    ==========================================
-    SCROLL PROGRESS + HEADER
-    ==========================================
-    */
+    const progress =
+        document.querySelector(".scroll-progress");
 
-    const progress = document.querySelector(".scroll-progress");
-    const header = document.querySelector(".site-header");
+    const header =
+        document.querySelector(".site-header");
+
 
     function updateScroll() {
 
-        const scrollTop = window.scrollY;
+        const scrollTop =
+            window.scrollY;
 
         const pageHeight =
             document.documentElement.scrollHeight -
             window.innerHeight;
+
 
         const percentage =
             pageHeight > 0
                 ? (scrollTop / pageHeight) * 100
                 : 0;
 
+
         if (progress) {
-            progress.style.width = `${percentage}%`;
+
+            progress.style.width =
+                `${percentage}%`;
+
         }
+
 
         if (header) {
 
-            if (scrollTop > 30) {
-                header.classList.add("scrolled");
-            } else {
-                header.classList.remove("scrolled");
-            }
+            header.classList.toggle(
+                "scrolled",
+                scrollTop > 30
+            );
 
         }
 
     }
 
-    window.addEventListener("scroll", updateScroll, {
-        passive: true
-    });
+
+    window.addEventListener(
+        "scroll",
+        updateScroll,
+        { passive: true }
+    );
+
 
     updateScroll();
 
 
-
-    /*
-    ==========================================
-    MOBILE MENU
-    ==========================================
-    */
+    /* ==========================================
+       MOBILE MENU
+    ========================================== */
 
     const menuToggle =
         document.querySelector(".menu-toggle");
@@ -85,88 +94,112 @@ document.addEventListener("DOMContentLoaded", () => {
         document.querySelector(".mobile-menu");
 
 
-    if (menuToggle && mobileMenu) {
+    if (
+        menuToggle &&
+        mobileMenu
+    ) {
 
-        menuToggle.addEventListener("click", () => {
+        menuToggle.addEventListener(
+            "click",
+            () => {
 
-            const isOpen =
-                mobileMenu.classList.toggle("open");
+                const isOpen =
+                    mobileMenu.classList.toggle("open");
 
-            menuToggle.setAttribute(
-                "aria-expanded",
-                String(isOpen)
-            );
 
-        });
+                menuToggle.setAttribute(
+                    "aria-expanded",
+                    String(isOpen)
+                );
+
+            }
+        );
 
 
         mobileMenu
             .querySelectorAll("a")
             .forEach(link => {
 
-                link.addEventListener("click", () => {
+                link.addEventListener(
+                    "click",
+                    () => {
 
-                    mobileMenu.classList.remove("open");
+                        mobileMenu.classList.remove(
+                            "open"
+                        );
 
-                    menuToggle.setAttribute(
-                        "aria-expanded",
-                        "false"
-                    );
+                        menuToggle.setAttribute(
+                            "aria-expanded",
+                            "false"
+                        );
 
-                });
+                    }
+                );
 
             });
 
     }
 
 
-
-    /*
-    ==========================================
-    SCROLL REVEAL
-    ==========================================
-    */
+    /* ==========================================
+       SCROLL REVEAL
+    ========================================== */
 
     const revealElements =
         document.querySelectorAll(".reveal");
 
 
-    const revealObserver =
-        new IntersectionObserver(
-            entries => {
+    if ("IntersectionObserver" in window) {
 
-                entries.forEach(entry => {
+        const revealObserver =
+            new IntersectionObserver(
+                entries => {
 
-                    if (entry.isIntersecting) {
+                    entries.forEach(entry => {
 
-                        entry.target.classList.add("visible");
+                        if (
+                            entry.isIntersecting
+                        ) {
 
-                        revealObserver.unobserve(
-                            entry.target
-                        );
+                            entry.target.classList.add(
+                                "visible"
+                            );
 
-                    }
+                            revealObserver.unobserve(
+                                entry.target
+                            );
 
-                });
+                        }
 
-            },
-            {
-                threshold: 0.12
+                    });
+
+                },
+                {
+                    threshold: 0.12
+                }
+            );
+
+
+        revealElements.forEach(
+            element => {
+                revealObserver.observe(element);
             }
         );
 
+    } else {
 
-    revealElements.forEach(element => {
-        revealObserver.observe(element);
-    });
+        revealElements.forEach(
+            element => {
+                element.classList.add("visible");
+            }
+        );
+
+    }
 
 
-
-    /*
-    ==========================================
-    FAQ
-    ==========================================
-    */
+    /* ==========================================
+       FAQ
+    ========================================== */
 
     const faqItems =
         document.querySelectorAll(".faq-item");
@@ -175,271 +208,443 @@ document.addEventListener("DOMContentLoaded", () => {
     faqItems.forEach(item => {
 
         const question =
-            item.querySelector(".faq-question");
+            item.querySelector(
+                ".faq-question"
+            );
 
         const answer =
-            item.querySelector(".faq-answer");
-
-
-        question.addEventListener("click", () => {
-
-            const wasActive =
-                item.classList.contains("active");
-
-
-            faqItems.forEach(other => {
-
-                other.classList.remove("active");
-
-                const otherAnswer =
-                    other.querySelector(".faq-answer");
-
-                if (otherAnswer) {
-                    otherAnswer.style.maxHeight = null;
-                }
-
-            });
-
-
-            if (!wasActive) {
-
-                item.classList.add("active");
-
-                answer.style.maxHeight =
-                    `${answer.scrollHeight}px`;
-
-            }
-
-        });
-
-    });
-
-
-
-    /*
-    ==========================================
-    SERVICE → CONTACT FORM
-    ==========================================
-    */
-
-    const serviceSelect =
-        document.querySelector("#service");
-
-
-    document
-        .querySelectorAll("[data-service]")
-        .forEach(button => {
-
-            button.addEventListener("click", () => {
-
-                const service =
-                    button.getAttribute("data-service");
-
-                if (serviceSelect && service) {
-
-                    serviceSelect.value = service;
-
-                }
-
-            });
-
-        });
-
-
-
-    /*
-    ==========================================
-    SMOOTH ANCHOR SCROLL
-    ==========================================
-    */
-
-    document
-        .querySelectorAll('a[href^="#"]')
-        .forEach(link => {
-
-            link.addEventListener("click", event => {
-
-                const targetId =
-                    link.getAttribute("href");
-
-                if (
-                    !targetId ||
-                    targetId === "#"
-                ) {
-                    return;
-                }
-
-
-                const target =
-                    document.querySelector(targetId);
-
-
-                if (!target) {
-                    return;
-                }
-
-
-                event.preventDefault();
-
-
-                const headerOffset = 75;
-
-                const targetPosition =
-                    target.getBoundingClientRect().top +
-                    window.scrollY -
-                    headerOffset;
-
-
-                window.scrollTo({
-                    top: targetPosition,
-                    behavior: "smooth"
-                });
-
-            });
-
-        });
-
-
-
-    /*
-    ==========================================
-    WHATSAPP SMART BUTTONS
-    ==========================================
-    */
-
-    const whatsappNumber =
-        "919310151087";
-
-
-    const whatsappMessages = {
-
-        "New Website":
-            "Hi VELORA.STUDIO, I'm interested in booking a new website.",
-
-        "Website Design":
-            "Hi VELORA.STUDIO, I'd like to discuss website design.",
-
-        "Website Development":
-            "Hi VELORA.STUDIO, I'd like to discuss website development.",
-
-        "Website Redesign":
-            "Hi VELORA.STUDIO, I'd like to discuss redesigning my website.",
-
-        "Landing Page":
-            "Hi VELORA.STUDIO, I'm interested in a landing page.",
-
-        "E-commerce":
-            "Hi VELORA.STUDIO, I'd like to discuss an e-commerce website.",
-
-        "UI/UX Design":
-            "Hi VELORA.STUDIO, I'd like to discuss UI/UX design.",
-
-        "Animations & Interactions":
-            "Hi VELORA.STUDIO, I'd like to add animations and interactions to my website.",
-
-        "Website Optimization":
-            "Hi VELORA.STUDIO, I'd like to discuss optimizing my website.",
-
-        "Website Maintenance":
-            "Hi VELORA.STUDIO, I'd like to discuss website maintenance."
-
-    };
-
-
-    document
-        .querySelectorAll("[data-service]")
-        .forEach(button => {
-
-            button.addEventListener("contextmenu", () => {
-                // Keeps normal browser behavior.
-            });
-
-        });
-
-
-
-    /*
-    ==========================================
-    BOOKING / CONTACT OPTIONS
-    ==========================================
-    */
-
-    const contactButtons =
-        document.querySelectorAll(".button-primary");
-
-
-    contactButtons.forEach(button => {
-
-        const service =
-            button.getAttribute("data-service");
-
-
-        if (!service) {
+            item.querySelector(
+                ".faq-answer"
+            );
+
+
+        if (
+            !question ||
+            !answer
+        ) {
             return;
         }
 
 
-        button.addEventListener("click", () => {
+        question.addEventListener(
+            "click",
+            () => {
 
-            const select =
-                document.querySelector("#service");
+                const wasActive =
+                    item.classList.contains(
+                        "active"
+                    );
 
-            if (select) {
-                select.value = service;
+
+                faqItems.forEach(
+                    other => {
+
+                        other.classList.remove(
+                            "active"
+                        );
+
+
+                        const otherQuestion =
+                            other.querySelector(
+                                ".faq-question"
+                            );
+
+
+                        const otherAnswer =
+                            other.querySelector(
+                                ".faq-answer"
+                            );
+
+
+                        if (otherAnswer) {
+
+                            otherAnswer.style.maxHeight =
+                                null;
+
+                        }
+
+
+                        if (otherQuestion) {
+
+                            otherQuestion.setAttribute(
+                                "aria-expanded",
+                                "false"
+                            );
+
+                        }
+
+                    }
+                );
+
+
+                if (!wasActive) {
+
+                    item.classList.add(
+                        "active"
+                    );
+
+
+                    question.setAttribute(
+                        "aria-expanded",
+                        "true"
+                    );
+
+
+                    answer.style.maxHeight =
+                        `${answer.scrollHeight}px`;
+
+                }
+
             }
-
-        });
+        );
 
     });
 
 
+    /* ==========================================
+       SMOOTH ANCHOR SCROLL
+    ========================================== */
 
-    /*
-    ==========================================
-    CONTACT FORM
-    ==========================================
-    */
+    document
+        .querySelectorAll(
+            'a[href^="#"]'
+        )
+        .forEach(link => {
+
+            link.addEventListener(
+                "click",
+                event => {
+
+                    const targetId =
+                        link.getAttribute(
+                            "href"
+                        );
+
+
+                    if (
+                        !targetId ||
+                        targetId === "#"
+                    ) {
+                        return;
+                    }
+
+
+                    const target =
+                        document.querySelector(
+                            targetId
+                        );
+
+
+                    if (!target) {
+                        return;
+                    }
+
+
+                    event.preventDefault();
+
+
+                    const headerOffset =
+                        window.innerWidth <= 760
+                            ? 65
+                            : 80;
+
+
+                    const targetPosition =
+                        target.getBoundingClientRect()
+                            .top +
+                        window.scrollY -
+                        headerOffset;
+
+
+                    window.scrollTo({
+                        top: targetPosition,
+                        behavior: "smooth"
+                    });
+
+                }
+            );
+
+        });
+
+
+    /* ==========================================
+       BEFORE / AFTER SLIDER
+    ========================================== */
+
+    const comparisonFrame =
+        document.querySelector(
+            ".comparison-frame"
+        );
+
+    const comparisonAfter =
+        document.querySelector(
+            "#comparisonAfter"
+        );
+
+    const comparisonHandle =
+        document.querySelector(
+            "#comparisonHandle"
+        );
+
+
+    if (
+        comparisonFrame &&
+        comparisonAfter &&
+        comparisonHandle
+    ) {
+
+        let dragging = false;
+
+
+        function setSlider(percentage) {
+
+            percentage =
+                Math.max(
+                    5,
+                    Math.min(
+                        95,
+                        percentage
+                    )
+                );
+
+
+            comparisonAfter.style.width =
+                `${percentage}%`;
+
+
+            comparisonHandle.style.left =
+                `${percentage}%`;
+
+
+            comparisonHandle.setAttribute(
+                "aria-valuenow",
+                Math.round(percentage)
+            );
+
+
+            /*
+            Keep the AFTER website at the
+            full comparison width instead
+            of shrinking the iframe.
+            */
+
+            comparisonFrame.style
+                .setProperty(
+                    "--comparison-width",
+                    `${comparisonFrame.clientWidth}px`
+                );
+
+        }
+
+
+        function setSliderFromPointer(
+            clientX
+        ) {
+
+            const rect =
+                comparisonFrame
+                    .getBoundingClientRect();
+
+
+            const percentage =
+                (
+                    (clientX - rect.left) /
+                    rect.width
+                ) * 100;
+
+
+            setSlider(percentage);
+
+        }
+
+
+        comparisonHandle.addEventListener(
+            "pointerdown",
+            event => {
+
+                dragging = true;
+
+
+                comparisonHandle.setPointerCapture(
+                    event.pointerId
+                );
+
+
+                setSliderFromPointer(
+                    event.clientX
+                );
+
+            }
+        );
+
+
+        comparisonFrame.addEventListener(
+            "pointermove",
+            event => {
+
+                if (!dragging) {
+                    return;
+                }
+
+
+                setSliderFromPointer(
+                    event.clientX
+                );
+
+            }
+        );
+
+
+        comparisonHandle.addEventListener(
+            "pointerup",
+            () => {
+
+                dragging = false;
+
+            }
+        );
+
+
+        comparisonHandle.addEventListener(
+            "pointercancel",
+            () => {
+
+                dragging = false;
+
+            }
+        );
+
+
+        comparisonHandle.addEventListener(
+            "keydown",
+            event => {
+
+                const current =
+                    Number(
+                        comparisonHandle
+                            .getAttribute(
+                                "aria-valuenow"
+                            )
+                    ) || 50;
+
+
+                if (
+                    event.key ===
+                    "ArrowLeft"
+                ) {
+
+                    event.preventDefault();
+
+                    setSlider(
+                        current - 5
+                    );
+
+                }
+
+
+                if (
+                    event.key ===
+                    "ArrowRight"
+                ) {
+
+                    event.preventDefault();
+
+                    setSlider(
+                        current + 5
+                    );
+
+                }
+
+            }
+        );
+
+
+        window.addEventListener(
+            "resize",
+            () => {
+
+                comparisonFrame.style
+                    .setProperty(
+                        "--comparison-width",
+                        `${comparisonFrame.clientWidth}px`
+                    );
+
+            }
+        );
+
+
+        setSlider(50);
+
+    }
+
+
+    /* ==========================================
+       CONTACT FORM → WHATSAPP
+    ========================================== */
 
     const form =
-        document.querySelector("#project-form");
+        document.querySelector(
+            "#project-form"
+        );
 
 
     if (form) {
 
-        form.addEventListener("submit", event => {
+        form.addEventListener(
+            "submit",
+            event => {
 
-            event.preventDefault();
-
-
-            const name =
-                document.querySelector("#name").value.trim();
-
-            const email =
-                document.querySelector("#email").value.trim();
-
-            const service =
-                document.querySelector("#service").value;
-
-            const budget =
-                document.querySelector("#budget").value;
-
-            const message =
-                document.querySelector("#message").value.trim();
+                event.preventDefault();
 
 
-            if (!name || !email || !service || !message) {
-                return;
-            }
+                const name =
+                    document.querySelector(
+                        "#name"
+                    )?.value.trim();
 
 
-            const subject =
-                `New VELORA.STUDIO Project Enquiry — ${service}`;
+                const email =
+                    document.querySelector(
+                        "#email"
+                    )?.value.trim();
 
 
-            const body =
-`Hello VELORA.STUDIO,
+                const service =
+                    document.querySelector(
+                        "#service"
+                    )?.value;
 
-I would like to discuss a website project.
+
+                const budget =
+                    document.querySelector(
+                        "#budget"
+                    )?.value;
+
+
+                const message =
+                    document.querySelector(
+                        "#message"
+                    )?.value.trim();
+
+
+                if (
+                    !name ||
+                    !email ||
+                    !service ||
+                    !message
+                ) {
+
+                    form.reportValidity();
+
+                    return;
+
+                }
+
+
+                const whatsappMessage =
+`Hi VELORA.STUDIO 👋
+
+I'd like to discuss a website project.
 
 Name:
 ${name}
@@ -454,90 +659,120 @@ Approximate Budget:
 ${budget || "Not specified"}
 
 Project Details:
-${message}
-
-Thank you.`;
+${message}`;
 
 
-            const mailto =
-                `mailto:golobbygamerz@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+                const whatsappURL =
+                    `https://wa.me/919310151087?text=${encodeURIComponent(
+                        whatsappMessage
+                    )}`;
 
 
-            const success =
-                document.querySelector("#form-success");
+                const success =
+                    document.querySelector(
+                        "#form-success"
+                    );
 
 
-            if (success) {
-                success.classList.add("show");
-            }
+                if (success) {
+
+                    success.classList.add(
+                        "show"
+                    );
+
+                }
 
 
-            window.location.href = mailto;
-
-        });
-
-    }
-
-
-
-    /*
-    ==========================================
-    FLOATING CONTACT
-    ==========================================
-    */
-
-    const floatingContact =
-        document.querySelector(".floating-contact");
-
-    const floatingButton =
-        document.querySelector(".floating-contact-button");
-
-
-    if (floatingContact && floatingButton) {
-
-        floatingButton.addEventListener("click", () => {
-
-            const isOpen =
-                floatingContact.classList.toggle("open");
-
-
-            floatingButton.setAttribute(
-                "aria-expanded",
-                String(isOpen)
-            );
-
-        });
-
-
-        document.addEventListener("click", event => {
-
-            if (
-                !floatingContact.contains(event.target)
-            ) {
-
-                floatingContact.classList.remove("open");
-
-                floatingButton.setAttribute(
-                    "aria-expanded",
-                    "false"
+                window.open(
+                    whatsappURL,
+                    "_blank",
+                    "noopener,noreferrer"
                 );
 
             }
-
-        });
+        );
 
     }
 
 
+    /* ==========================================
+       FLOATING CONTACT
+    ========================================== */
 
-    /*
-    ==========================================
-    MAGNETIC BUTTONS
-    ==========================================
-    */
+    const floatingContact =
+        document.querySelector(
+            ".floating-contact"
+        );
+
+    const floatingButton =
+        document.querySelector(
+            ".floating-contact-button"
+        );
+
+
+    if (
+        floatingContact &&
+        floatingButton
+    ) {
+
+        floatingButton.addEventListener(
+            "click",
+            event => {
+
+                event.stopPropagation();
+
+
+                const isOpen =
+                    floatingContact.classList.toggle(
+                        "open"
+                    );
+
+
+                floatingButton.setAttribute(
+                    "aria-expanded",
+                    String(isOpen)
+                );
+
+            }
+        );
+
+
+        document.addEventListener(
+            "click",
+            event => {
+
+                if (
+                    !floatingContact.contains(
+                        event.target
+                    )
+                ) {
+
+                    floatingContact.classList.remove(
+                        "open"
+                    );
+
+
+                    floatingButton.setAttribute(
+                        "aria-expanded",
+                        "false"
+                    );
+
+                }
+
+            }
+        );
+
+    }
+
+
+    /* ==========================================
+       MAGNETIC BUTTONS
+    ========================================== */
 
     const magneticButtons =
-        document.querySelectorAll(".magnetic");
+        document.querySelectorAll(
+            ".magnetic"
+        );
 
 
     if (
@@ -546,59 +781,76 @@ Thank you.`;
         ).matches
     ) {
 
-        magneticButtons.forEach(button => {
+        magneticButtons.forEach(
+            button => {
 
-            button.addEventListener("mousemove", event => {
+                button.addEventListener(
+                    "mousemove",
+                    event => {
 
-                const rect =
-                    button.getBoundingClientRect();
-
-                const x =
-                    event.clientX -
-                    rect.left -
-                    rect.width / 2;
-
-                const y =
-                    event.clientY -
-                    rect.top -
-                    rect.height / 2;
+                        const rect =
+                            button.getBoundingClientRect();
 
 
-                button.style.transform =
-                    `translate(${x * 0.12}px, ${y * 0.12}px)`;
+                        const x =
+                            event.clientX -
+                            rect.left -
+                            rect.width / 2;
 
-            });
+
+                        const y =
+                            event.clientY -
+                            rect.top -
+                            rect.height / 2;
 
 
-            button.addEventListener("mouseleave", () => {
+                        button.style.transform =
+                            `translate(
+                                ${x * 0.10}px,
+                                ${y * 0.10}px
+                            )`;
 
-                button.style.transform = "";
+                    }
+                );
 
-            });
 
-        });
+                button.addEventListener(
+                    "mouseleave",
+                    () => {
+
+                        button.style.transform =
+                            "";
+
+                    }
+                );
+
+            }
+        );
 
     }
 
 
-
-    /*
-    ==========================================
-    CUSTOM CURSOR
-    ==========================================
-    */
+    /* ==========================================
+       CUSTOM CURSOR
+    ========================================== */
 
     const cursorDot =
-        document.querySelector(".cursor-dot");
+        document.querySelector(
+            ".cursor-dot"
+        );
 
     const cursorRing =
-        document.querySelector(".cursor-ring");
+        document.querySelector(
+            ".cursor-ring"
+        );
 
 
     if (
         cursorDot &&
         cursorRing &&
-        window.matchMedia("(pointer: fine)").matches
+        window.matchMedia(
+            "(pointer: fine)"
+        ).matches
     ) {
 
         let mouseX = 0;
@@ -608,28 +860,41 @@ Thank you.`;
         let ringY = 0;
 
 
-        document.addEventListener("mousemove", event => {
+        document.addEventListener(
+            "mousemove",
+            event => {
 
-            mouseX = event.clientX;
-            mouseY = event.clientY;
+                mouseX =
+                    event.clientX;
+
+                mouseY =
+                    event.clientY;
 
 
-            cursorDot.style.left =
-                `${mouseX}px`;
+                cursorDot.style.left =
+                    `${mouseX}px`;
 
-            cursorDot.style.top =
-                `${mouseY}px`;
+                cursorDot.style.top =
+                    `${mouseY}px`;
 
-        });
+            }
+        );
 
 
         function animateCursor() {
 
             ringX +=
-                (mouseX - ringX) * 0.12;
+                (
+                    mouseX -
+                    ringX
+                ) * 0.12;
+
 
             ringY +=
-                (mouseY - ringY) * 0.12;
+                (
+                    mouseY -
+                    ringY
+                ) * 0.12;
 
 
             cursorRing.style.left =
@@ -650,85 +915,137 @@ Thank you.`;
 
 
         document
-            .querySelectorAll("a, button, .service-card, .project-preview")
+            .querySelectorAll(
+                "a, button, .service-card, .project-preview"
+            )
             .forEach(element => {
 
-                element.addEventListener("mouseenter", () => {
+                element.addEventListener(
+                    "mouseenter",
+                    () => {
 
-                    document.body.classList.add(
-                        "cursor-hover"
-                    );
+                        document.body.classList.add(
+                            "cursor-hover"
+                        );
 
-                });
+                    }
+                );
 
 
-                element.addEventListener("mouseleave", () => {
+                element.addEventListener(
+                    "mouseleave",
+                    () => {
 
-                    document.body.classList.remove(
-                        "cursor-hover"
-                    );
+                        document.body.classList.remove(
+                            "cursor-hover"
+                        );
 
-                });
+                    }
+                );
 
             });
 
     }
 
 
-
-    /*
-    ==========================================
-    HERO PARALLAX
-    ==========================================
-    */
+    /* ==========================================
+       HERO PARALLAX
+    ========================================== */
 
     const heroVisual =
-        document.querySelector(".hero-visual");
+        document.querySelector(
+            ".hero-visual"
+        );
 
 
     if (
         heroVisual &&
-        window.matchMedia("(pointer: fine)").matches
+        window.matchMedia(
+            "(pointer: fine)"
+        ).matches
     ) {
 
-        document.addEventListener("mousemove", event => {
+        document.addEventListener(
+            "mousemove",
+            event => {
 
-            const x =
-                (event.clientX / window.innerWidth - 0.5);
+                const x =
+                    event.clientX /
+                    window.innerWidth -
+                    0.5;
 
-            const y =
-                (event.clientY / window.innerHeight - 0.5);
+
+                const y =
+                    event.clientY /
+                    window.innerHeight -
+                    0.5;
 
 
-            heroVisual.style.transform =
-                `translate(${x * 8}px, ${y * 8}px)`;
+                heroVisual.style.transform =
+                    `translate(
+                        ${x * 8}px,
+                        ${y * 8}px
+                    )`;
 
-        });
+            }
+        );
 
     }
 
 
+    /* ==========================================
+       ESCAPE KEY
+    ========================================== */
 
-    /*
-    ==========================================
-    ESCAPE KEY
-    ==========================================
-    */
+    document.addEventListener(
+        "keydown",
+        event => {
 
-    document.addEventListener("keydown", event => {
-
-        if (event.key === "Escape") {
-
-            if (mobileMenu) {
-                mobileMenu.classList.remove("open");
+            if (
+                event.key !== "Escape"
+            ) {
+                return;
             }
 
+
+            if (mobileMenu) {
+
+                mobileMenu.classList.remove(
+                    "open"
+                );
+
+            }
+
+
+            if (menuToggle) {
+
+                menuToggle.setAttribute(
+                    "aria-expanded",
+                    "false"
+                );
+
+            }
+
+
             if (floatingContact) {
-                floatingContact.classList.remove("open");
+
+                floatingContact.classList.remove(
+                    "open"
+                );
+
+            }
+
+
+            if (floatingButton) {
+
+                floatingButton.setAttribute(
+                    "aria-expanded",
+                    "false"
+                );
+
             }
 
         }
-
-    });
+    );
 
 });
