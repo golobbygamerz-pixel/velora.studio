@@ -1,69 +1,139 @@
-/* =========================================================
-   VELORA.STUDIO
-   INTERACTIONS & FUNCTIONALITY
-   ========================================================= */
-
 document.addEventListener("DOMContentLoaded", () => {
 
-    /* ================= ELEMENTS ================= */
+    /*
+    ==========================================
+    PAGE LOADER
+    ==========================================
+    */
 
+    document.body.classList.add("loading");
+
+    window.addEventListener("load", () => {
+
+        setTimeout(() => {
+
+            const loader = document.querySelector(".page-loader");
+
+            if (loader) {
+                loader.classList.add("hidden");
+            }
+
+            document.body.classList.remove("loading");
+
+        }, 500);
+
+    });
+
+
+
+    /*
+    ==========================================
+    SCROLL PROGRESS + HEADER
+    ==========================================
+    */
+
+    const progress = document.querySelector(".scroll-progress");
     const header = document.querySelector(".site-header");
-    const progressBar = document.querySelector(".scroll-progress");
-    const cursorGlow = document.querySelector(".cursor-glow");
 
-    const menuToggle = document.querySelector(".menu-toggle");
-    const mobileMenu = document.querySelector(".mobile-menu");
-
-    const floatingContact = document.querySelector(".floating-contact");
-    const floatingButton = document.querySelector(".floating-contact-button");
-
-    const projectForm = document.querySelector("#project-form");
-    const serviceSelect = document.querySelector("#service");
-
-
-    /* ================= SCROLL EFFECTS ================= */
-
-    function handleScroll() {
+    function updateScroll() {
 
         const scrollTop = window.scrollY;
-        const documentHeight =
-            document.documentElement.scrollHeight - window.innerHeight;
 
-        /* Navigation */
+        const pageHeight =
+            document.documentElement.scrollHeight -
+            window.innerHeight;
 
-        if (scrollTop > 30) {
-            header.classList.add("scrolled");
-        } else {
-            header.classList.remove("scrolled");
+        const percentage =
+            pageHeight > 0
+                ? (scrollTop / pageHeight) * 100
+                : 0;
+
+        if (progress) {
+            progress.style.width = `${percentage}%`;
         }
 
+        if (header) {
 
-        /* Scroll progress */
+            if (scrollTop > 30) {
+                header.classList.add("scrolled");
+            } else {
+                header.classList.remove("scrolled");
+            }
 
-        if (documentHeight > 0) {
-
-            const progress =
-                (scrollTop / documentHeight) * 100;
-
-            progressBar.style.width = `${progress}%`;
         }
+
     }
 
-    window.addEventListener("scroll", handleScroll, {
+    window.addEventListener("scroll", updateScroll, {
         passive: true
     });
 
-    handleScroll();
+    updateScroll();
 
 
-    /* ================= SCROLL REVEAL ================= */
+
+    /*
+    ==========================================
+    MOBILE MENU
+    ==========================================
+    */
+
+    const menuToggle =
+        document.querySelector(".menu-toggle");
+
+    const mobileMenu =
+        document.querySelector(".mobile-menu");
+
+
+    if (menuToggle && mobileMenu) {
+
+        menuToggle.addEventListener("click", () => {
+
+            const isOpen =
+                mobileMenu.classList.toggle("open");
+
+            menuToggle.setAttribute(
+                "aria-expanded",
+                String(isOpen)
+            );
+
+        });
+
+
+        mobileMenu
+            .querySelectorAll("a")
+            .forEach(link => {
+
+                link.addEventListener("click", () => {
+
+                    mobileMenu.classList.remove("open");
+
+                    menuToggle.setAttribute(
+                        "aria-expanded",
+                        "false"
+                    );
+
+                });
+
+            });
+
+    }
+
+
+
+    /*
+    ==========================================
+    SCROLL REVEAL
+    ==========================================
+    */
 
     const revealElements =
         document.querySelectorAll(".reveal");
 
+
     const revealObserver =
         new IntersectionObserver(
-            (entries, observer) => {
+            entries => {
 
                 entries.forEach(entry => {
 
@@ -71,15 +141,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
                         entry.target.classList.add("visible");
 
-                        observer.unobserve(entry.target);
+                        revealObserver.unobserve(
+                            entry.target
+                        );
+
                     }
 
                 });
 
             },
             {
-                threshold: 0.12,
-                rootMargin: "0px 0px -40px 0px"
+                threshold: 0.12
             }
         );
 
@@ -89,54 +161,12 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
 
-    /* ================= MOBILE MENU ================= */
 
-    if (menuToggle && mobileMenu) {
-
-        menuToggle.addEventListener("click", () => {
-
-            menuToggle.classList.toggle("active");
-            mobileMenu.classList.toggle("active");
-
-            const isOpen =
-                mobileMenu.classList.contains("active");
-
-            menuToggle.setAttribute(
-                "aria-expanded",
-                isOpen
-            );
-
-            document.body.style.overflow =
-                isOpen ? "hidden" : "";
-        });
-
-
-        /* Close menu after clicking a link */
-
-        mobileMenu
-            .querySelectorAll("a")
-            .forEach(link => {
-
-                link.addEventListener("click", () => {
-
-                    menuToggle.classList.remove("active");
-                    mobileMenu.classList.remove("active");
-
-                    menuToggle.setAttribute(
-                        "aria-expanded",
-                        "false"
-                    );
-
-                    document.body.style.overflow = "";
-
-                });
-
-            });
-
-    }
-
-
-    /* ================= FAQ ACCORDION ================= */
+    /*
+    ==========================================
+    FAQ
+    ==========================================
+    */
 
     const faqItems =
         document.querySelectorAll(".faq-item");
@@ -147,6 +177,9 @@ document.addEventListener("DOMContentLoaded", () => {
         const question =
             item.querySelector(".faq-question");
 
+        const answer =
+            item.querySelector(".faq-answer");
+
 
         question.addEventListener("click", () => {
 
@@ -154,19 +187,27 @@ document.addEventListener("DOMContentLoaded", () => {
                 item.classList.contains("active");
 
 
-            /* Close all other FAQ items */
+            faqItems.forEach(other => {
 
-            faqItems.forEach(otherItem => {
+                other.classList.remove("active");
 
-                otherItem.classList.remove("active");
+                const otherAnswer =
+                    other.querySelector(".faq-answer");
+
+                if (otherAnswer) {
+                    otherAnswer.style.maxHeight = null;
+                }
 
             });
 
 
-            /* Toggle current item */
-
             if (!wasActive) {
+
                 item.classList.add("active");
+
+                answer.style.maxHeight =
+                    `${answer.scrollHeight}px`;
+
             }
 
         });
@@ -174,49 +215,343 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
 
-    /* ================= CURSOR GLOW ================= */
 
-    const finePointer =
-        window.matchMedia("(pointer: fine)").matches;
+    /*
+    ==========================================
+    SERVICE → CONTACT FORM
+    ==========================================
+    */
+
+    const serviceSelect =
+        document.querySelector("#service");
 
 
-    if (finePointer && cursorGlow) {
+    document
+        .querySelectorAll("[data-service]")
+        .forEach(button => {
 
-        document.addEventListener("mousemove", event => {
+            button.addEventListener("click", () => {
 
-            cursorGlow.style.left =
-                `${event.clientX}px`;
+                const service =
+                    button.getAttribute("data-service");
 
-            cursorGlow.style.top =
-                `${event.clientY}px`;
+                if (serviceSelect && service) {
 
-            cursorGlow.style.opacity = "1";
+                    serviceSelect.value = service;
+
+                }
+
+            });
 
         });
 
-        document.addEventListener("mouseleave", () => {
 
-            cursorGlow.style.opacity = "0";
+
+    /*
+    ==========================================
+    SMOOTH ANCHOR SCROLL
+    ==========================================
+    */
+
+    document
+        .querySelectorAll('a[href^="#"]')
+        .forEach(link => {
+
+            link.addEventListener("click", event => {
+
+                const targetId =
+                    link.getAttribute("href");
+
+                if (
+                    !targetId ||
+                    targetId === "#"
+                ) {
+                    return;
+                }
+
+
+                const target =
+                    document.querySelector(targetId);
+
+
+                if (!target) {
+                    return;
+                }
+
+
+                event.preventDefault();
+
+
+                const headerOffset = 75;
+
+                const targetPosition =
+                    target.getBoundingClientRect().top +
+                    window.scrollY -
+                    headerOffset;
+
+
+                window.scrollTo({
+                    top: targetPosition,
+                    behavior: "smooth"
+                });
+
+            });
+
+        });
+
+
+
+    /*
+    ==========================================
+    WHATSAPP SMART BUTTONS
+    ==========================================
+    */
+
+    const whatsappNumber =
+        "919310151087";
+
+
+    const whatsappMessages = {
+
+        "New Website":
+            "Hi VELORA.STUDIO, I'm interested in booking a new website.",
+
+        "Website Design":
+            "Hi VELORA.STUDIO, I'd like to discuss website design.",
+
+        "Website Development":
+            "Hi VELORA.STUDIO, I'd like to discuss website development.",
+
+        "Website Redesign":
+            "Hi VELORA.STUDIO, I'd like to discuss redesigning my website.",
+
+        "Landing Page":
+            "Hi VELORA.STUDIO, I'm interested in a landing page.",
+
+        "E-commerce":
+            "Hi VELORA.STUDIO, I'd like to discuss an e-commerce website.",
+
+        "UI/UX Design":
+            "Hi VELORA.STUDIO, I'd like to discuss UI/UX design.",
+
+        "Animations & Interactions":
+            "Hi VELORA.STUDIO, I'd like to add animations and interactions to my website.",
+
+        "Website Optimization":
+            "Hi VELORA.STUDIO, I'd like to discuss optimizing my website.",
+
+        "Website Maintenance":
+            "Hi VELORA.STUDIO, I'd like to discuss website maintenance."
+
+    };
+
+
+    document
+        .querySelectorAll("[data-service]")
+        .forEach(button => {
+
+            button.addEventListener("contextmenu", () => {
+                // Keeps normal browser behavior.
+            });
+
+        });
+
+
+
+    /*
+    ==========================================
+    BOOKING / CONTACT OPTIONS
+    ==========================================
+    */
+
+    const contactButtons =
+        document.querySelectorAll(".button-primary");
+
+
+    contactButtons.forEach(button => {
+
+        const service =
+            button.getAttribute("data-service");
+
+
+        if (!service) {
+            return;
+        }
+
+
+        button.addEventListener("click", () => {
+
+            const select =
+                document.querySelector("#service");
+
+            if (select) {
+                select.value = service;
+            }
+
+        });
+
+    });
+
+
+
+    /*
+    ==========================================
+    CONTACT FORM
+    ==========================================
+    */
+
+    const form =
+        document.querySelector("#project-form");
+
+
+    if (form) {
+
+        form.addEventListener("submit", event => {
+
+            event.preventDefault();
+
+
+            const name =
+                document.querySelector("#name").value.trim();
+
+            const email =
+                document.querySelector("#email").value.trim();
+
+            const service =
+                document.querySelector("#service").value;
+
+            const budget =
+                document.querySelector("#budget").value;
+
+            const message =
+                document.querySelector("#message").value.trim();
+
+
+            if (!name || !email || !service || !message) {
+                return;
+            }
+
+
+            const subject =
+                `New VELORA.STUDIO Project Enquiry — ${service}`;
+
+
+            const body =
+`Hello VELORA.STUDIO,
+
+I would like to discuss a website project.
+
+Name:
+${name}
+
+Email:
+${email}
+
+Service:
+${service}
+
+Approximate Budget:
+${budget || "Not specified"}
+
+Project Details:
+${message}
+
+Thank you.`;
+
+
+            const mailto =
+                `mailto:golobbygamerz@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+
+
+            const success =
+                document.querySelector("#form-success");
+
+
+            if (success) {
+                success.classList.add("show");
+            }
+
+
+            window.location.href = mailto;
 
         });
 
     }
 
 
-    /* ================= MAGNETIC BUTTONS ================= */
 
-    if (finePointer) {
+    /*
+    ==========================================
+    FLOATING CONTACT
+    ==========================================
+    */
 
-        const magneticElements =
-            document.querySelectorAll(".magnetic");
+    const floatingContact =
+        document.querySelector(".floating-contact");
+
+    const floatingButton =
+        document.querySelector(".floating-contact-button");
 
 
-        magneticElements.forEach(element => {
+    if (floatingContact && floatingButton) {
 
-            element.addEventListener("mousemove", event => {
+        floatingButton.addEventListener("click", () => {
+
+            const isOpen =
+                floatingContact.classList.toggle("open");
+
+
+            floatingButton.setAttribute(
+                "aria-expanded",
+                String(isOpen)
+            );
+
+        });
+
+
+        document.addEventListener("click", event => {
+
+            if (
+                !floatingContact.contains(event.target)
+            ) {
+
+                floatingContact.classList.remove("open");
+
+                floatingButton.setAttribute(
+                    "aria-expanded",
+                    "false"
+                );
+
+            }
+
+        });
+
+    }
+
+
+
+    /*
+    ==========================================
+    MAGNETIC BUTTONS
+    ==========================================
+    */
+
+    const magneticButtons =
+        document.querySelectorAll(".magnetic");
+
+
+    if (
+        window.matchMedia(
+            "(pointer: fine)"
+        ).matches
+    ) {
+
+        magneticButtons.forEach(button => {
+
+            button.addEventListener("mousemove", event => {
 
                 const rect =
-                    element.getBoundingClientRect();
+                    button.getBoundingClientRect();
 
                 const x =
                     event.clientX -
@@ -229,16 +564,15 @@ document.addEventListener("DOMContentLoaded", () => {
                     rect.height / 2;
 
 
-                element.style.transform =
+                button.style.transform =
                     `translate(${x * 0.12}px, ${y * 0.12}px)`;
 
             });
 
 
-            element.addEventListener("mouseleave", () => {
+            button.addEventListener("mouseleave", () => {
 
-                element.style.transform =
-                    "translate(0, 0)";
+                button.style.transform = "";
 
             });
 
@@ -247,13 +581,115 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
 
-    /* ================= HERO PARALLAX ================= */
 
-    const heroInterface =
-        document.querySelector(".hero-interface");
+    /*
+    ==========================================
+    CUSTOM CURSOR
+    ==========================================
+    */
+
+    const cursorDot =
+        document.querySelector(".cursor-dot");
+
+    const cursorRing =
+        document.querySelector(".cursor-ring");
 
 
-    if (finePointer && heroInterface) {
+    if (
+        cursorDot &&
+        cursorRing &&
+        window.matchMedia("(pointer: fine)").matches
+    ) {
+
+        let mouseX = 0;
+        let mouseY = 0;
+
+        let ringX = 0;
+        let ringY = 0;
+
+
+        document.addEventListener("mousemove", event => {
+
+            mouseX = event.clientX;
+            mouseY = event.clientY;
+
+
+            cursorDot.style.left =
+                `${mouseX}px`;
+
+            cursorDot.style.top =
+                `${mouseY}px`;
+
+        });
+
+
+        function animateCursor() {
+
+            ringX +=
+                (mouseX - ringX) * 0.12;
+
+            ringY +=
+                (mouseY - ringY) * 0.12;
+
+
+            cursorRing.style.left =
+                `${ringX}px`;
+
+            cursorRing.style.top =
+                `${ringY}px`;
+
+
+            requestAnimationFrame(
+                animateCursor
+            );
+
+        }
+
+
+        animateCursor();
+
+
+        document
+            .querySelectorAll("a, button, .service-card, .project-preview")
+            .forEach(element => {
+
+                element.addEventListener("mouseenter", () => {
+
+                    document.body.classList.add(
+                        "cursor-hover"
+                    );
+
+                });
+
+
+                element.addEventListener("mouseleave", () => {
+
+                    document.body.classList.remove(
+                        "cursor-hover"
+                    );
+
+                });
+
+            });
+
+    }
+
+
+
+    /*
+    ==========================================
+    HERO PARALLAX
+    ==========================================
+    */
+
+    const heroVisual =
+        document.querySelector(".hero-visual");
+
+
+    if (
+        heroVisual &&
+        window.matchMedia("(pointer: fine)").matches
+    ) {
 
         document.addEventListener("mousemove", event => {
 
@@ -264,291 +700,35 @@ document.addEventListener("DOMContentLoaded", () => {
                 (event.clientY / window.innerHeight - 0.5);
 
 
-            heroInterface.style.setProperty(
-                "--mouse-x",
-                `${x * 18}px`
-            );
-
-            heroInterface.style.setProperty(
-                "--mouse-y",
-                `${y * 18}px`
-            );
+            heroVisual.style.transform =
+                `translate(${x * 8}px, ${y * 8}px)`;
 
         });
 
     }
 
 
-    /* ================= SERVICE → FORM ================= */
 
-    const serviceButtons =
-        document.querySelectorAll("[data-service]");
-
-
-    serviceButtons.forEach(button => {
-
-        button.addEventListener("click", () => {
-
-            const selectedService =
-                button.getAttribute("data-service");
-
-
-            if (serviceSelect && selectedService) {
-
-                serviceSelect.value =
-                    selectedService;
-
-            }
-
-        });
-
-    });
-
-
-    /* ================= SMOOTH ANCHOR LINKS ================= */
-
-    document
-        .querySelectorAll('a[href^="#"]')
-        .forEach(link => {
-
-            link.addEventListener("click", event => {
-
-                const targetId =
-                    link.getAttribute("href");
-
-                if (!targetId || targetId === "#") {
-                    return;
-                }
-
-
-                const target =
-                    document.querySelector(targetId);
-
-                if (!target) {
-                    return;
-                }
-
-
-                event.preventDefault();
-
-
-                target.scrollIntoView({
-                    behavior: "smooth",
-                    block: "start"
-                });
-
-            });
-
-        });
-
-
-    /* ================= FLOATING CONTACT ================= */
-
-    if (floatingButton && floatingContact) {
-
-        floatingButton.addEventListener("click", () => {
-
-            floatingContact.classList.toggle("open");
-
-        });
-
-
-        /* Close when clicking outside */
-
-        document.addEventListener("click", event => {
-
-            if (
-                !floatingContact.contains(event.target)
-            ) {
-
-                floatingContact.classList.remove("open");
-
-            }
-
-        });
-
-    }
-
-
-    /* ================= PROJECT FORM ================= */
-
-    if (projectForm) {
-
-        projectForm.addEventListener("submit", event => {
-
-            event.preventDefault();
-
-
-            const formData =
-                new FormData(projectForm);
-
-
-            const name =
-                formData.get("name")?.trim() || "";
-
-            const business =
-                formData.get("business")?.trim() || "";
-
-            const email =
-                formData.get("email")?.trim() || "";
-
-            const phone =
-                formData.get("phone")?.trim() || "";
-
-            const website =
-                formData.get("website")?.trim() || "";
-
-            const service =
-                formData.get("service") || "Not specified";
-
-            const budget =
-                formData.get("budget") || "Not specified";
-
-            const details =
-                formData.get("details")?.trim() || "";
-
-
-            /* Basic validation */
-
-            if (!name || !email || !details) {
-
-                alert(
-                    "Please fill in your name, email, and project details."
-                );
-
-                return;
-
-            }
-
-
-            /* Email subject */
-
-            const subject =
-                encodeURIComponent(
-                    `New Velora Studio Project Inquiry — ${name}`
-                );
-
-
-            /* Email body */
-
-            const body =
-                encodeURIComponent(
-`Hello Velora Studio,
-
-I'd like to discuss a website project.
-
-NAME
-${name}
-
-BUSINESS / BRAND
-${business || "Not provided"}
-
-EMAIL
-${email}
-
-PHONE
-${phone || "Not provided"}
-
-CURRENT WEBSITE
-${website || "Not provided"}
-
-SERVICE
-${service}
-
-BUDGET
-${budget}
-
-PROJECT DETAILS
-${details}
-
-Looking forward to discussing the project.
-
-Regards,
-${name}`
-                );
-
-
-            /*
-             * Frontend-only submission:
-             * Opens the visitor's email client.
-             */
-
-            window.location.href =
-                `mailto:golobbygamerz@gmail.com?subject=${subject}&body=${body}`;
-
-
-            /* Visual confirmation */
-
-            const submitButton =
-                projectForm.querySelector(".form-submit");
-
-
-            if (submitButton) {
-
-                const originalText =
-                    submitButton.innerHTML;
-
-
-                submitButton.innerHTML =
-                    "Opening Email Client ✓";
-
-
-                setTimeout(() => {
-
-                    submitButton.innerHTML =
-                        originalText;
-
-                }, 3000);
-
-            }
-
-        });
-
-    }
-
-
-    /* ================= ESC KEY ================= */
+    /*
+    ==========================================
+    ESCAPE KEY
+    ==========================================
+    */
 
     document.addEventListener("keydown", event => {
 
         if (event.key === "Escape") {
 
-            mobileMenu?.classList.remove("active");
-            menuToggle?.classList.remove("active");
-            floatingContact?.classList.remove("open");
+            if (mobileMenu) {
+                mobileMenu.classList.remove("open");
+            }
 
-            document.body.style.overflow = "";
+            if (floatingContact) {
+                floatingContact.classList.remove("open");
+            }
 
         }
 
     });
-
-
-    /* ================= INITIAL STATE ================= */
-
-    document
-        .querySelectorAll(".reveal")
-        .forEach(element => {
-
-            /*
-             * Elements already visible on initial load
-             * should animate in naturally.
-             */
-
-            const rect =
-                element.getBoundingClientRect();
-
-            if (rect.top < window.innerHeight * 0.9) {
-
-                element.classList.add("visible");
-
-            }
-
-        });
-
-
-    console.log(
-        "VELORA.STUDIO — Digital experience initialized."
-    );
 
 });
