@@ -1239,3 +1239,46 @@ Thank you.`;
   );
 
 });
+const aiButton = document.getElementById("veloraAIButton");
+const aiWindow = document.getElementById("veloraAIWindow");
+const aiClose = document.getElementById("veloraAIClose");
+const aiForm = document.getElementById("veloraAIForm");
+const aiInput = document.getElementById("veloraAIInput");
+const aiMessages = document.getElementById("veloraAIMessages");
+
+aiButton.addEventListener("click", () => {
+  aiWindow.classList.add("active");
+  aiInput.focus();
+});
+
+aiClose.addEventListener("click", () => {
+  aiWindow.classList.remove("active");
+});
+
+aiForm.addEventListener("submit", (e) => {
+  e.preventDefault();
+
+  const text = aiInput.value.trim();
+
+  if (!text) return;
+
+  addAIMessage(text, "user");
+  aiInput.value = "";
+
+  setTimeout(() => {
+    addAIMessage(
+      "Thanks! I'm ready to help. Our AI backend isn't connected yet, so this is currently the chat interface. In the next step, we'll connect me to the actual AI.",
+      "bot"
+    );
+  }, 600);
+});
+
+function addAIMessage(text, type) {
+  const message = document.createElement("div");
+
+  message.className = `velora-ai-message ${type}`;
+  message.textContent = text;
+
+  aiMessages.appendChild(message);
+  aiMessages.scrollTop = aiMessages.scrollHeight;
+}
