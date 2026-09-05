@@ -1597,6 +1597,41 @@
 
 
   <script src="./script.js" defer></script>
+<!-- VELORA AI -->
+<div class="velora-ai">
+  <button class="velora-ai-button" id="veloraAIButton" aria-label="Open VELORA AI">
+    <span class="ai-dot"></span>
+    VELORA AI
+  </button>
 
+  <div class="velora-ai-window" id="veloraAIWindow">
+    <div class="velora-ai-header">
+      <div>
+        <strong>VELORA AI</strong>
+        <small>Digital Website Consultant</small>
+      </div>
+      <button id="veloraAIClose" aria-label="Close">×</button>
+    </div>
+
+    <div class="velora-ai-messages" id="veloraAIMessages">
+      <div class="velora-ai-message bot">
+        Hey! I'm VELORA AI. 👋<br><br>
+        I can help you find the right website solution for your business.
+        What are you looking to build or improve?
+      </div>
+    </div>
+
+    <form class="velora-ai-input" id="veloraAIForm">
+      <input
+        type="text"
+        id="veloraAIInput"
+        placeholder="Tell me what you need..."
+        autocomplete="off"
+      />
+      <button type="submit" aria-label="Send">↑</button>
+    </form>
+  </div>
+  
+</div>
 </body>
 </html>
