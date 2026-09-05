@@ -2290,3 +2290,174 @@ body.cursor-hover .cursor-ring {
   }
 
 }
+/* ================================
+   VELORA AI
+================================ */
+
+.velora-ai {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 99999;
+  font-family: Inter, Arial, sans-serif;
+}
+
+.velora-ai-button {
+  border: 1px solid rgba(255,255,255,.18);
+  background: #111;
+  color: #fff;
+  padding: 13px 18px;
+  border-radius: 999px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 13px;
+  font-weight: 600;
+  box-shadow: 0 15px 40px rgba(0,0,0,.25);
+  transition: .25s ease;
+}
+
+.velora-ai-button:hover {
+  transform: translateY(-3px);
+}
+
+.ai-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #7cff9b;
+  box-shadow: 0 0 12px #7cff9b;
+}
+
+.velora-ai-window {
+  position: absolute;
+  right: 0;
+  bottom: 65px;
+  width: min(380px, calc(100vw - 30px));
+  height: 540px;
+  background: rgba(18,18,18,.96);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 24px;
+  overflow: hidden;
+  display: none;
+  flex-direction: column;
+  box-shadow: 0 30px 80px rgba(0,0,0,.4);
+}
+
+.velora-ai-window.active {
+  display: flex;
+  animation: veloraAIIn .25s ease;
+}
+
+@keyframes veloraAIIn {
+  from {
+    opacity: 0;
+    transform: translateY(15px) scale(.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.velora-ai-header {
+  padding: 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+  color: #fff;
+}
+
+.velora-ai-header strong {
+  display: block;
+  font-size: 14px;
+}
+
+.velora-ai-header small {
+  display: block;
+  margin-top: 4px;
+  opacity: .55;
+  font-size: 11px;
+}
+
+.velora-ai-header button {
+  background: transparent;
+  border: 0;
+  color: #fff;
+  font-size: 25px;
+  cursor: pointer;
+}
+
+.velora-ai-messages {
+  flex: 1;
+  padding: 18px;
+  overflow-y: auto;
+}
+
+.velora-ai-message {
+  max-width: 85%;
+  padding: 12px 14px;
+  border-radius: 16px;
+  margin-bottom: 12px;
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.velora-ai-message.bot {
+  background: rgba(255,255,255,.08);
+  color: #fff;
+}
+
+.velora-ai-message.user {
+  margin-left: auto;
+  background: #fff;
+  color: #111;
+}
+
+.velora-ai-input {
+  display: flex;
+  gap: 8px;
+  padding: 14px;
+  border-top: 1px solid rgba(255,255,255,.08);
+}
+
+.velora-ai-input input {
+  flex: 1;
+  min-width: 0;
+  border: 1px solid rgba(255,255,255,.1);
+  outline: none;
+  background: rgba(255,255,255,.06);
+  color: #fff;
+  padding: 12px 14px;
+  border-radius: 14px;
+}
+
+.velora-ai-input input::placeholder {
+  color: rgba(255,255,255,.4);
+}
+
+.velora-ai-input button {
+  width: 44px;
+  border: 0;
+  border-radius: 14px;
+  background: #fff;
+  color: #111;
+  cursor: pointer;
+  font-size: 18px;
+}
+
+@media (max-width: 600px) {
+  .velora-ai {
+    right: 15px;
+    bottom: 15px;
+  }
+
+  .velora-ai-window {
+    right: -5px;
+    bottom: 60px;
+    height: 70vh;
+  }
+}
