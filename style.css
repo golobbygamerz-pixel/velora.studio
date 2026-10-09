@@ -105,6 +105,10 @@ img {
   visibility: hidden;
   pointer-events: none;
 }
+/* Emergency loader safety */
+.page-loader.force-hidden {
+display: none !important;
+}
 
 .loader-inner {
   text-align: center;
