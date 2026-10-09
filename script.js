@@ -23,27 +23,7 @@ document.addEventListener("DOMContentLoaded", () => {
 PAGE LOADER — VELORA STUDIO
 ========================================= */
 
-(function () {
-function hideLoader() {
-const loader = document.querySelector(”.page-loader”);
 
-if (loader) {
-  loader.classList.add("loaded");
-  loader.setAttribute("aria-hidden", "true");
-}
-document.body.classList.remove("loading");
-
-}
-
-if (document.readyState === “complete”) {
-setTimeout(hideLoader, 350);
-} else {
-window.addEventListener(“load”, hideLoader, { once: true });
-}
-
-// Safety fallback
-setTimeout(hideLoader, 2500);
-})();
 
   /* =========================================
      SCROLL PROGRESS + HEADER
