@@ -19,19 +19,9 @@ document.addEventListener("DOMContentLoaded", () => {
     window.matchMedia("(pointer: fine)").matches;
 
 
-  /* =========================================
-     PAGE LOADER
-  ========================================= */
-
-  if (loader) {
-  loader.classList.add("loaded");
-  loader.setAttribute("aria-hidden", "true");
-}
-
-document.body.classList.remove("loading");
-
-  
-/* VELORA STUDIO — LOADER FIX */
+/* =========================================
+PAGE LOADER — VELORA STUDIO
+========================================= */
 
 (function () {
 function hideLoader() {
@@ -54,7 +44,6 @@ window.addEventListener(“load”, hideLoader, { once: true });
 // Safety fallback
 setTimeout(hideLoader, 2500);
 })();
-
 
   /* =========================================
      SCROLL PROGRESS + HEADER
