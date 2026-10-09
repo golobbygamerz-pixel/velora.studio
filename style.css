@@ -2294,3 +2294,14 @@ body.cursor-hover .cursor-ring {
   }
 
 }
+/* VELORA STUDIO — EMERGENCY LOADER FIX */
+.page-loader {
+display: none !important;
+}
+
+.reveal {
+opacity: 1 !important;
+visibility: visible !important;
+transform: none !important;
+filter: none !important;
+}
