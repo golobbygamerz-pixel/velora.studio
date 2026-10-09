@@ -25,27 +25,29 @@ document.addEventListener("DOMContentLoaded", () => {
 
   document.body.classList.add("loading");
 
-  const hideLoader = () => {
-    const loader = document.querySelector(".page-loader");
+  
+const hideLoader = () => {
+  const loader = document.querySelector(".page-loader");
 
-    if (loader) {
-      loader.classList.add("hidden");
-    }
-
-    document.body.classList.remove("loading");
-  };
-
-  if (document.readyState === "complete") {
-    setTimeout(hideLoader, 350);
-  } else {
-    window.addEventListener(
-      "load",
-      () => {
-        setTimeout(hideLoader, 350);
-      },
-      { once: true }
-    );
+  if (loader) {
+    loader.classList.add("hidden");
+    loader.setAttribute("aria-hidden", "true");
   }
+
+  document.body.classList.remove("loading");
+};
+
+// Hide loader after the page has had time to initialize.
+if (document.readyState === "complete") {
+  setTimeout(hideLoader, 500);
+} else {
+  window.addEventListener("load", () => {
+    setTimeout(hideLoader, 500);
+  }, { once: true });
+
+  // Fallback in case the load event is delayed.
+  setTimeout(hideLoader, 4000);
+}
 
 
   /* =========================================
