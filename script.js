@@ -23,7 +23,12 @@ document.addEventListener("DOMContentLoaded", () => {
      PAGE LOADER
   ========================================= */
 
-  document.body.classList.add("loading");
+  if (loader) {
+  loader.classList.add("loaded");
+  loader.setAttribute("aria-hidden", "true");
+}
+
+document.body.classList.remove("loading");
 
   
 /* VELORA STUDIO — LOADER FIX */
@@ -34,19 +39,19 @@ const loader = document.querySelector(”.page-loader”);
 
 if (loader) {
   loader.classList.add("loaded");
+  loader.setAttribute("aria-hidden", "true");
 }
 document.body.classList.remove("loading");
 
 }
 
-// Hide loader after page loads
 if (document.readyState === “complete”) {
-hideLoader();
+setTimeout(hideLoader, 350);
 } else {
 window.addEventListener(“load”, hideLoader, { once: true });
 }
 
-// Safety fallback: never leave the loader stuck
+// Safety fallback
 setTimeout(hideLoader, 2500);
 })();
 
