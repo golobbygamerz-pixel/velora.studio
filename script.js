@@ -26,28 +26,29 @@ document.addEventListener("DOMContentLoaded", () => {
   document.body.classList.add("loading");
 
   
-const hideLoader = () => {
-  const loader = document.querySelector(".page-loader");
+/* VELORA STUDIO — LOADER FIX */
 
-  if (loader) {
-    loader.classList.add("hidden");
-    loader.setAttribute("aria-hidden", "true");
-  }
+(function () {
+function hideLoader() {
+const loader = document.querySelector(”.page-loader”);
 
-  document.body.classList.remove("loading");
-};
-
-// Hide loader after the page has had time to initialize.
-if (document.readyState === "complete") {
-  setTimeout(hideLoader, 500);
-} else {
-  window.addEventListener("load", () => {
-    setTimeout(hideLoader, 500);
-  }, { once: true });
-
-  // Fallback in case the load event is delayed.
-  setTimeout(hideLoader, 4000);
+if (loader) {
+  loader.classList.add("loaded");
 }
+document.body.classList.remove("loading");
+
+}
+
+// Hide loader after page loads
+if (document.readyState === “complete”) {
+hideLoader();
+} else {
+window.addEventListener(“load”, hideLoader, { once: true });
+}
+
+// Safety fallback: never leave the loader stuck
+setTimeout(hideLoader, 2500);
+})();
 
 
   /* =========================================
